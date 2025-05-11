@@ -42,3 +42,12 @@ app.post('/user/:id', (req: Request, res: Response)=>{
 
     res.status(200).json({message: "Usuário alterado com sucesso", name})
 })
+
+app.delete('/user/:id', (req: Request, res: Response)=>{
+    const { id } = req.params
+    const indexUser = users.findIndex(u => u.id === parseInt(id))
+    if (indexUser < 0) res.status(404).json({message: "Não encontrado nenhum usuário com esse ID"})
+    users.splice(indexUser, 1)
+    
+    res.status(200).json({message: "Usuário excluído com sucesso"})
+})
