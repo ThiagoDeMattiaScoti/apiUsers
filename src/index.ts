@@ -16,3 +16,18 @@ app.post('/user', (req: Request, res: Response)=>{
 
     res.status(201).json({message: "Usuário criado com sucesso", newUser})
 })
+
+app.get('/user', (req: Request, res: Response)=>{
+    if (users.length === 0) res.status(404).json({message: "Não existem usuários para consulta"})
+    res.status(200).json(users)
+})
+
+app.get('/user/:id', (req: Request, res: Response)=>{
+    if (users.length === 0) res.status(404).json({message: "Não existem usuários para consulta"})
+    const { id } = req.params
+    const indexUser = users.findIndex(u => u.id === parseInt(id))
+    if (indexUser < 0) res.status(404).json({message: "Não encontrado nenhum usuário com esse ID"})
+    const user = users[indexUser]
+
+    res.status(200).json(user)
+})
