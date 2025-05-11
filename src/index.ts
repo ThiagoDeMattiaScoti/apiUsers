@@ -31,3 +31,14 @@ app.get('/user/:id', (req: Request, res: Response)=>{
 
     res.status(200).json(user)
 })
+
+app.post('/user/:id', (req: Request, res: Response)=>{
+    const { id } = req.params
+    const indexUser = users.findIndex(u => u.id === parseInt(id))
+    if (indexUser < 0) res.status(404).json({message: "Não encontrado nenhum usuário com esse ID"})
+    const { name } = req.body
+    if (!name) res.status(400).json({message: "Usuário precisa ter um nome para ser criado"})
+    users[indexUser].name = name
+
+    res.status(200).json({message: "Usuário alterado com sucesso", name})
+})
