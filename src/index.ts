@@ -17,7 +17,7 @@ app.get('/user', async (req: Request, res: Response)=>{
         res.status(400).json({message: "Ocorreu um erro ao fazer a consulta", err
         })
     } finally {await pool.end()}
-})
+});
 
 app.post('/user', async (req: Request, res: Response)=>{
     const {name} = req.body
@@ -29,7 +29,7 @@ app.post('/user', async (req: Request, res: Response)=>{
     } catch(err){
         res.status(500).json({message: "Deu erro"})
     }
-})
+});
 
 app.get('/user/:id', async (req: Request, res: Response)=>{
     const { id } = req.params
@@ -39,7 +39,7 @@ app.get('/user/:id', async (req: Request, res: Response)=>{
        const result = await pool.query(query, values)
        res.status(200).json(result.rows[0])
     } catch (err){ res.status(500)}
-})
+});
 
 app.put('/user/:id', async (req: Request, res: Response)=>{
     const { id } = req.params
@@ -50,7 +50,7 @@ app.put('/user/:id', async (req: Request, res: Response)=>{
         const result = await pool.query(query, values)
         res.status(200).json(result.rows[0])
     } catch (err) {res.status(500)}
-})
+});
 
 app.delete('/user/:id', async (req: Request, res: Reponse)=>{
     const { id } = req.params
@@ -60,7 +60,7 @@ app.delete('/user/:id', async (req: Request, res: Reponse)=>{
         const result = await pool.query(query, values)
         res.status(200).json(result.rows[0])
     } catch (err){ res.status(500)}
-})
+});
 //#region codigo antigo
 // const users: {id: number, name: string}[] = []
 
