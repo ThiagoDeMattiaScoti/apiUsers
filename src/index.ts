@@ -52,7 +52,7 @@ app.put('/user/:id', async (req: Request, res: Response)=>{
     } catch (err) {res.status(500)}
 });
 
-app.delete('/user/:id', async (req: Request, res: Reponse)=>{
+app.delete('/user/:id', async (req: Request, res: Response)=>{
     const { id } = req.params
     try{
         const query = 'DELETE FROM users WHERE id = $1'
