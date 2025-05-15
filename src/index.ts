@@ -69,16 +69,17 @@ app.delete('/user/:id', async (req: Request, res: Response)=>{
 app.post('/admin', async (req: Request, res: Response)=>{
     const {name, password, nameAdmin, passwordAdmin} = req.body
     try{
+        if (!nameAdmin || !passwordAdmin) res.status(400).send('Necessary say a admin name and password')
         const adminQuery = await pool.query('SELECT * FROM admins WHERE name = $1', [nameAdmin])
         const admin = adminQuery.rows[0]
         const isPasswordValid = await bcrypt.compare(passwordAdmin, admin.password)
-        if (!isPasswordValid) res.status(401).send('Invalid credentials')
-
-        const saltRounds = 5
-        const hashedPassword = await bcrypt.hash(password, saltRounds)
-        const result = await pool.query('INSERT INTO admins (name, password) VALUES ($1, $2)', [name, hashedPassword])
+        if (!isPasswordValid) res.status(401).send('Invalid admin Password')
+        
+        const hashForceCost = 10
+        const hashedPassword = await bcrypt.hash(password, hashForceCost)
+        const result = await pool.query('INSERT INTO admins (name, password) VALUES ($1, $2) RETURNING *', [name, hashedPassword])
         res.status(201).json(result.rows[0])
-    } catch (err){
+    } catch(err){
         res.status(500).send(err)
     }
 })
