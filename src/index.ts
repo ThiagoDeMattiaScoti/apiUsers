@@ -1,5 +1,4 @@
-import express from 'express'
-import { Request, Response } from 'express'
+import express, { Request, Response } from 'express'
 import pool from './database'
 import bcrypt from 'bcrypt'
 
