@@ -9,9 +9,11 @@ app.listen(8080, ()=>{
 })
 
 app.post('/user', async (req: Request, res: Response)=>{
-    const {name} = req.body
+    const {name, password} = req.body
     try{
-        const result = await pool.query('INSERT INTO users (name) VALUES ($1) RETURNING *', [name])
+        const saltRounds = 10
+        const hashedPassword = await bcrypt.hash(password, saltRounds)
+        const result = await pool.query('INSERT INTO users (name, password) VALUES ($1, $2) RETURNING *', [name, hashedPassword])
         res.status(201).json((result).rows[0])
     } catch (err){
         res.status(500).send(err)
@@ -20,7 +22,7 @@ app.post('/user', async (req: Request, res: Response)=>{
 
 app.get('/user', async (req:Request, res: Response)=>{
     try{
-        const result = await pool.query('SELECT * FROM users')
+        const result = await pool.query('SELECT id, name FROM users')
         res.status(200).json(result.rows)
     } catch(err){
         res.status(500).send(err)
@@ -30,7 +32,7 @@ app.get('/user', async (req:Request, res: Response)=>{
 app.get('/user/:id', async (req: Request, res: Response)=>{
     const {id} = req.params
     try{
-        const result = await pool.query('SELECT * FROM users WHERE id = $1', [id])
+        const result = await pool.query('SELECT id, name FROM users WHERE id = $1', [id])
         res.status(200).json(result.rows[0])
     } catch(err) {
         res.status(500).send(err)
@@ -80,5 +82,19 @@ app.post('/admin', async (req: Request, res: Response)=>{
         res.status(201).json(result.rows[0])
     } catch(err){
         res.status(500).send(err)
+    }
+})
+
+app.post('/login', async (req: Request, res: Response)=>{
+    const {name, password} = req.body
+    const userQuery = await pool.query('SELECT * FROM users WHERE name = $1', [name])
+    const user = userQuery.rows[0]
+    if (!user) res.status(400).json({erro: "Usuário sem nome cadastrado na base de dados"})
+    const isCredentialsValids = await bcrypt.compare(password, user.password)
+    if (!isCredentialsValids) res.status(404).json({erro: "Credenciais inválidas"})
+    try {
+        res.status(200).json({message:"Login realizado com sucesso"})
+    } catch (err){
+        res.status(500).json({err})
     }
 })
