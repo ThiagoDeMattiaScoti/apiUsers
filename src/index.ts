@@ -1,12 +1,17 @@
 import express, { Request, Response } from 'express'
 import pool from './database'
 import bcrypt from 'bcrypt'
+import jwt from 'jsonwebtoken'
+import { authenticateJWT } from './verifyToken'
 
 const app = express()
 app.use(express.json())
 app.listen(8080, ()=>{
     console.log("Servidor rodando na porta 8080")
 })
+
+const JWT_SECRET = '327mo'
+declare global { namespace Express {interface Request {user?: LoginPayload}}}
 
 app.post('/user', async (req: Request, res: Response)=>{
     const {name, password} = req.body
@@ -39,13 +44,13 @@ app.get('/user/:id', async (req: Request, res: Response)=>{
     }
 })
 
-app.put('/user/:id', async (req: Request, res: Response)=>{
+app.put('/user/:id', authenticateJWT,async (req: Request, res: Response)=>{
+    const loggedInUser = req.user as LoginPayload
     const {id} = req.params
-    const {name, nameAdmin, passwordAdmin} = req.body
-    const adminQuery = await pool.query('SELECT * FROM admins WHERE name = $1', [nameAdmin])
-    const admin = adminQuery.rows[0]
-    const isPasswordCorret = await bcrypt.compare(passwordAdmin, admin.password)
-    if (!isPasswordCorret) res.status(4040).send('Usuário sem permissão de administrador')
+    const {name} = req.body
+    if (String(loggedInUser.userId) !== id){
+        res.status(404).json({erro: 'Você só pode modificar seus dados'})
+    }
     try{
         const result = await pool.query('UPDATE users SET name = $2 WHERE id = $1', [id, name])
         res.status(200).json(result.rows[0])
@@ -87,14 +92,24 @@ app.post('/admin', async (req: Request, res: Response)=>{
 
 app.post('/login', async (req: Request, res: Response)=>{
     const {name, password} = req.body
-    const userQuery = await pool.query('SELECT * FROM users WHERE name = $1', [name])
+    const userQuery = await pool.query('SELECT * FROM users where name = $1', [name])
     const user = userQuery.rows[0]
-    if (!user) res.status(400).json({erro: "Usuário sem nome cadastrado na base de dados"})
-    const isCredentialsValids = await bcrypt.compare(password, user.password)
-    if (!isCredentialsValids) res.status(404).json({erro: "Credenciais inválidas"})
-    try {
-        res.status(200).json({message:"Login realizado com sucesso"})
+    const isPasswordCorret = await bcrypt.compare(password, user.password)
+    if (!isPasswordCorret) res.status(404).send('Senha incorreta')
+    try{
+        const payload: LoginPayload = {
+            userId: user.id,
+            userName: user.name,
+            userPassword: user.password
+        }
+
+        const token = jwt.sign(
+            payload,
+            JWT_SECRET,
+            { expiresIn: '3m'}
+        )
+        res.status(200).json({message: 'Login feito com sucesso', token})
     } catch (err){
-        res.status(500).json({err})
+        res.status(500).send(err)
     }
 })
