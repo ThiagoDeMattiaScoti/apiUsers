@@ -17,8 +17,6 @@ API RESTful robusta para gerenciamento de usuários e administradores, com foco 
 -   **bcrypt:** Biblioteca para hashing de senhas, garantindo segurança.
 -   **jsonwebtoken (JWT):** Para criação e verificação de tokens de autenticação.
 -   **TypeScript:** Linguagem de programação que adiciona tipagem estática ao JavaScript.
--   **ts-node-dev:** Para desenvolvimento com recarregamento automático.
--   **dotenv:** Para gerenciamento de variáveis de ambiente.
 
 ## Configuração e Execução
 
@@ -163,9 +161,4 @@ Todos os endpoints baseiam-se em `http://localhost:8080` (ou a porta configurada
 
 -   **Hashing de Senhas:** Todas as senhas são armazenadas no banco de dados após serem hashadas com `bcrypt`, impedindo o acesso direto às senhas originais.
 -   **Controle de Acesso Baseado em Papéis:** Apenas administradores autenticados podem criar novos administradores e remover usuários.
--   **Variáveis de Ambiente:** Informações sensíveis como credenciais do banco de dados e o segredo JWT são gerenciadas via variáveis de ambiente (`.env`), não sendo expostas diretamente no código-fonte.
 -   **Tokens JWT:** Os tokens têm um tempo de expiração limitado (3 minutos) para reduzir o risco de uso indevido em caso de comprometimento.
-
-## Licença
-
-Este projeto está licenciado sob a licença ISC. Veja o arquivo `LICENSE` para mais detalhes. (Assumindo que há um arquivo LICENSE ou que a licença ISC é a padrão, como indicado no `package.json`)
